@@ -61,8 +61,8 @@ function View() {
     }
 
     self.getTransform = function (myElement) {
-        var xforms = myElement.getAttribute('transform');
-        var parts = /translate\(\s*([^\s,)]+)[ ,]([^\s,)]+)/.exec(xforms);
+        const xforms = myElement.getAttribute('transform');
+        const parts = /translate\(\s*([^\s,)]+)[ ,]([^\s,)]+)/.exec(xforms);
         return {
             x: Number(parts[1]),
             y: Number(parts[2])
@@ -162,7 +162,7 @@ function View() {
 
     self.resizeField = function (cellWidthHeight) {            // изменить размер всех элементов на поле
         let elements = document.querySelectorAll("#game circle")
-        for (var i = 0; i < elements.length; i++) {
+        for (let i = 0; i < elements.length; i++) {
             let id = elements[i].getAttribute('id'),
                 row = id[1],
                 column = id[0];
@@ -175,7 +175,7 @@ function View() {
 
     self.deleteField = function () {                   //удалить все элементы на поле
         let elements = document.querySelectorAll("#game circle");
-        for (var i = 0; i < elements.length; i++) {
+        for (let i = 0; i < elements.length; i++) {
             elements[i].remove();
         }
         return elements
@@ -241,8 +241,12 @@ function View() {
         for (let i = 0; i < collectMove.length; i++) {
             let id = collectMove[i],
                 elPiece = document.getElementById(id),
-                trans = self.getTransform(elPiece),
+                trans = elPiece ? self.getTransform(elPiece) : null,
                 el = new Element;
+
+            if (!elPiece || !trans) {
+                continue
+            }
 
             el.row = id[0];
             el.column = id[1];
@@ -275,8 +279,12 @@ function View() {
             secondElPiece = document.getElementById(secondEl.row + '' + secondEl.column),
             id1 = firstEl.row + '' + firstEl.column,
             id2 = secondEl.row + '' + secondEl.column,
-            trans1 = self.getTransform(firstElPiece),
-            trans2 = self.getTransform(secondElPiece);
+            trans1 = firstElPiece ? self.getTransform(firstElPiece) : null,
+            trans2 = secondElPiece ? self.getTransform(secondElPiece) : null;
+
+        if (!firstElPiece || !secondElPiece || !trans1 || !trans2) {
+            return
+        }
 
         if (sideMove === 'left') {
             firstEl.transX = trans1.x - speedExch;

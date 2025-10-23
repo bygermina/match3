@@ -48,8 +48,8 @@ function Model() {
         circles = document.getElementsByTagName('circle');
 
     self.getTransform = function (myElement) {
-        var xforms = myElement.getAttribute('transform');
-        var parts = /translate\(\s*([^\s,)]+)[ ,]([^\s,)]+)/.exec(xforms);
+        const xforms = myElement.getAttribute('transform');
+        const parts = /translate\(\s*([^\s,)]+)[ ,]([^\s,)]+)/.exec(xforms);
         return {
             x: Number(parts[1]),
             y: Number(parts[2])
@@ -115,11 +115,11 @@ function Model() {
                 sameColor = [];
 
             for (let i = rows - 1; i >= 0; i--) {           //находим одинаковые ряды
-                sameColorEl = [];
                 for (let j = columns - 1; j > 1; j--) {
                     if ((matrix[i][j] === matrix[i][j - 1]) &&
                         (matrix[i][j] === matrix[i][j - 2]) &&
                         (matrix[i][j] !== null)) {
+                        sameColorEl = [];
                         sameColorEl.push(i + '' + j, i + '' + (j - 1), i + '' + (j - 2));
 
                         for (let k = 3; k < j + 1; k++) {           //если больше трех одинаковых эл-тов в ряд
@@ -141,6 +141,7 @@ function Model() {
                     if ((matrix[i][j] === matrix[i - 1][j]) &&
                         (matrix[i - 2][j] === matrix[i][j]) &&
                         (matrix[i][j] !== null)) {
+                        sameColorEl = [];
                         sameColorEl.push(i + '' + j, (i - 1) + '' + j, (i - 2) + '' + j);
 
                         for (let k = 3; k < i + 1; k++) {           //если больше трех одинаковых эл-тов в ряд
@@ -161,6 +162,7 @@ function Model() {
                     if ((matrix[i][j] === matrix[i - 1][j - 1]) &&
                         (matrix[i - 2][j - 2] === matrix[i][j]) &&
                         (matrix[i][j] !== null)) {
+                        sameColorEl = [];
                         sameColorEl.push(i + '' + j, (i - 1) + '' + (j - 1), (i - 2) + '' + (j - 2));
                         for (let k = 3; k < i + 1; k++) {
                             if (matrix[i][j] === matrix[i - k][j - k]) {
@@ -180,6 +182,7 @@ function Model() {
                     if ((matrix[i][j] === matrix[i - 1][j + 1]) &&
                         (matrix[i - 2][j + 2] === matrix[i][j]) &&
                         (matrix[i][j] !== null)) {
+                        sameColorEl = [];
                         sameColorEl.push(i + '' + j, (i - 1) + '' + (j + 1), (i - 2) + '' + (j + 2));
                         for (let k = 3; k < i + 1; k++) {
                             if (matrix[i][j] === matrix[i - k][j + k]) {
@@ -289,9 +292,9 @@ function Model() {
     self.findElExchange = function (startMoveX, startMoveY, endMoveX, endMoveY) {
 
         function findFirstElDir() {  //находим первый эл-т и направление движения мыши
-
-            firstEl['row'] = Math.floor((startMoveY - game.getBoundingClientRect().top) / cellWidthHeight);
-            firstEl['column'] = Math.floor((startMoveX - game.getBoundingClientRect().left) / cellWidthHeight);
+            const rect = game.getBoundingClientRect();
+            firstEl['row'] = Math.floor((startMoveY - rect.top) / cellWidthHeight);
+            firstEl['column'] = Math.floor((startMoveX - rect.left) / cellWidthHeight);
 
             if ((Math.abs(endMoveX - startMoveX) > Math.abs(endMoveY - startMoveY))) {      //горизонтальное движение
                 if (endMoveX > startMoveX) {
@@ -370,7 +373,7 @@ function Model() {
         self.fillIn(matrix, colors, 1);      //заполнить пустые ячейки в первом ряду матрицы и нарисовать их во View
         a = self.findSameColor(matrix); //поиск совпадающих ячеек
         if (a.length !== 0) {         // если такие есть
-            collect = myView.deleteGroup(a, emptyFlag); // удалить совпадения
+            collect = myView.deleteGroup(a); // удалить совпадения
             emptyFlag = true;
             deleted = self.markNullsDeleted(collect, matrix); //заполнить null удаленные эл-ты в матрице
 
@@ -407,7 +410,7 @@ function Model() {
             timer = setInterval(animateFall, 1000 / 60);
 
             function animateFall() {               //анимация падения
-                myView.fallAnimationTick(collectMove, emptyFlag);
+                myView.fallAnimationTick(collectMove);
             }
         }
     }
@@ -473,7 +476,7 @@ function Model() {
             secondEl.row = null;
             secondEl.column = null;
 
-            collect = myView.deleteGroup(a, emptyFlag); // удалить совпадения
+            collect = myView.deleteGroup(a); // удалить совпадения
             emptyFlag = true;
             deleted = self.markNullsDeleted(collect, matrix); //заполнить null удаленные эл-ты в матрице
 

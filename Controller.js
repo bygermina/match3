@@ -11,6 +11,9 @@ function Controller() {
         windowStartMoveX,  //переменные координат начала и конца движения для обработки свайпа
         windowEndMoveX;
 
+    const MOVE_MIN_PX = 10;      // минимальная длина жеста для перемещения
+    const SWIPE_MIN_PX = 200;    // минимальная длина свайпа для переключения страниц
+
     const SVGElem = document.getElementById("game");
 
     self.init = function (model, view) {
@@ -93,8 +96,8 @@ function Controller() {
     }
 
     self.stopListenMoves = function () {
-        SVGElem.removeEventListener('mousedown', self.imgMouseDown, true);
-        SVGElem.removeEventListener('mouseup', self.imgMouseUp, true);
+        SVGElem.removeEventListener('mousedown', self.imgMouseDown, false);
+        SVGElem.removeEventListener('mouseup', self.imgMouseUp, false);
 
         SVGElem.removeEventListener('touchstart', self.imgTouchStart, {passive: false});
         SVGElem.removeEventListener('touchend', self.imgTouchEnd, {passive: false});
@@ -120,8 +123,8 @@ function Controller() {
 
         endMoveX = EO.pageX;
         endMoveY = EO.pageY;
-        if ((Math.abs(endMoveX - startMoveX) > 10) ||  //движение должно быть более 10 пикселей
-            (Math.abs(endMoveY - startMoveY) > 10)) {
+        if ((Math.abs(endMoveX - startMoveX) > MOVE_MIN_PX) ||  //движение должно быть более 10 пикселей
+            (Math.abs(endMoveY - startMoveY) > MOVE_MIN_PX)) {
 
             self.stopListenMoves();
             myModel.findElExchange(startMoveX, startMoveY, endMoveX, endMoveY);
@@ -134,10 +137,10 @@ function Controller() {
         let touches = EO.changedTouches;
         endMoveX = touches[0].pageX;
         endMoveY = touches[0].pageY;
-        if (((Math.abs(endMoveX - startMoveX) > 10) &&
-            (Math.abs(endMoveX - startMoveX) < 200)) ||  //если движение более 10 и меньше 200 пикселей, то это чтобы передвигать шарики
-            ((Math.abs(endMoveY - startMoveY) > 10) &&
-                (Math.abs(endMoveY - startMoveY) < 200))) {
+        if (((Math.abs(endMoveX - startMoveX) > MOVE_MIN_PX) &&
+            (Math.abs(endMoveX - startMoveX) < SWIPE_MIN_PX)) ||  //если движение более 10 и меньше 200 пикселей, то это чтобы передвигать шарики
+            ((Math.abs(endMoveY - startMoveY) > MOVE_MIN_PX) &&
+                (Math.abs(endMoveY - startMoveY) < SWIPE_MIN_PX))) {
             myModel.findElExchange(startMoveX, startMoveY, endMoveX, endMoveY);
             self.stopListenMoves();
         }
@@ -156,13 +159,12 @@ function Controller() {
         let touches = EO.changedTouches;
         windowEndMoveX = touches[0].pageX;
 
-        if ((Math.abs(windowEndMoveX - windowStartMoveX) > 200)) {
-            if (Math.abs(windowEndMoveX - windowStartMoveX) > 200) {
-                if (windowEndMoveX - windowStartMoveX > 0) {
-                    self.showRules();
-                } else {
-                    self.showHighScore();
-                }
+        const deltaX = windowEndMoveX - windowStartMoveX;
+        if (Math.abs(deltaX) > SWIPE_MIN_PX) {
+            if (deltaX > 0) {
+                self.showRules();
+            } else {
+                self.showHighScore();
             }
         }
     }
@@ -174,12 +176,8 @@ function Controller() {
 
     self.switchToStateFromURLHash = function () {     //Переключение на УРЛ из Хэша
         let URLHash = window.location.hash,
-            stateStr = URLHash.substr(1)    // убираем из закладки УРЛа решётку
-        if (stateStr != "") { // если закладка непустая, читаем из неё состояние и отображаем
-            myModel.spaState = {pagename: stateStr} // первая часть закладки - номер страницы
-        } else {
-            myModel.spaState = {pagename: ''}  // иначе показываем главную страницу
-        }
+            stateStr = URLHash.substr(1);    // убираем из закладки УРЛа решётку
+        myModel.spaState = { pagename: stateStr !== "" ? stateStr : '' };
         myModel.spaStateChanged();
     }
 
